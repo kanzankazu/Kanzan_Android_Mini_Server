@@ -30,6 +30,10 @@ Panduan ini membawa kamu dari HP kosong sampai server yang bisa diakses via URL 
 - [Phase 5: Expose ke Internet via Cloudflare Tunnel](#-phase-5-expose-ke-internet-via-cloudflare-tunnel) — ±30–45 menit, HTTPS tanpa port forwarding
   - [Alternatif: Quick Tunnel (Tanpa Domain)](#alternatif-quick-tunnel-tanpa-domain) — URL random untuk testing, tanpa akun Cloudflare
   - [Ringkasan Semua Service](#ringkasan-semua-service) — checklist pm2 list yang diharapkan
+- [Phase 6: Setup Domain Custom](#-phase-6-setup-domain-custom) — ±15–30 menit, pasang domain kamu sendiri ke tunnel
+  - [Daftarkan Domain ke Cloudflare](#daftarkan-domain-ke-cloudflare) — arahkan nameserver domain ke Cloudflare
+  - [Buat DNS Record via Tunnel](#buat-dns-record-via-tunnel) — route subdomain ke service
+  - [Verifikasi Domain](#verifikasi-domain) — cek HTTPS berjalan
 - [Troubleshooting](#troubleshooting) — 11 kasus error umum beserta solusinya
   - [Termux killed saat layar mati](#termux-killed-saat-layar-mati) — wakelock & battery optimization
   - [`pkg update` error "No such file or directory"](#pkg-update-error-no-such-file-or-directory) — ganti mirror Termux
@@ -554,6 +558,112 @@ Checklist Phase 5:
 
 ---
 
+## 🌍 Phase 6: Setup Domain Custom
+
+> **Durasi estimasi:** 15–30 menit
+>
+> **Prasyarat:** Phase 5 sudah selesai — tunnel sudah berjalan dan `pm2 logs cloudflared` menampilkan "Connection established"
+
+Panduan ini menggunakan domain yang **sudah kamu miliki** (dibeli dari registrar seperti Niagahoster, Namecheap, GoDaddy, dll). Cloudflare bertindak sebagai nameserver sekaligus proxy gratis.
+
+### Daftarkan Domain ke Cloudflare
+
+1. Login ke [dash.cloudflare.com](https://dash.cloudflare.com) → **Add a Site**
+2. Masukkan domain kamu (contoh: `namaserver.com`) → pilih plan **Free** → Continue
+3. Cloudflare akan scan DNS record yang sudah ada → klik **Continue**
+4. Salin 2 nameserver yang diberikan Cloudflare, contoh:
+   ```
+   ara.ns.cloudflare.com
+   ken.ns.cloudflare.com
+   ```
+5. Buka panel registrar domain kamu → ganti nameserver lama dengan 2 nameserver Cloudflare di atas
+6. Tunggu propagasi — biasanya **10–30 menit**, maksimal 48 jam
+7. Kembali ke Cloudflare → klik **Done, check nameservers** → tunggu status berubah jadi **Active**
+
+> **Verifikasi nameserver aktif:**
+> ```bash
+> # Jalankan dari Ubuntu di HP
+> apt install dnsutils -y
+> dig NS namaserver.com +short
+> # Harus muncul nameserver Cloudflare
+> ```
+
+### Buat DNS Record via Tunnel
+
+Setelah domain aktif di Cloudflare, hubungkan subdomain ke tunnel:
+
+```bash
+# Di Ubuntu (pastikan sudah login cloudflared sebelumnya)
+# Format: cloudflared tunnel route dns <nama-tunnel> <subdomain>
+
+# Untuk API (arahkan ke Nginx port 80)
+cloudflared tunnel route dns android-server api.namaserver.com
+
+# Untuk Filebrowser (arahkan ke Nginx, routing /files ditangani Nginx)
+cloudflared tunnel route dns android-server files.namaserver.com
+```
+
+Perintah ini otomatis membuat **CNAME record** di Cloudflare DNS yang menunjuk ke tunnel ID kamu — tidak perlu buka dashboard manual.
+
+Lalu pastikan `config.yml` sudah mencantumkan hostname yang sesuai:
+
+```bash
+cat ~/.cloudflared/config.yml
+```
+
+Pastikan isi `ingress` mencantumkan domain yang baru didaftarkan:
+
+```yaml
+tunnel: <TUNNEL_ID>
+credentials-file: /root/.cloudflared/<TUNNEL_ID>.json
+
+loglevel: info
+
+ingress:
+  - hostname: api.namaserver.com      # ganti dengan domain kamu
+    service: http://localhost:80
+  - hostname: files.namaserver.com    # ganti dengan domain kamu
+    service: http://localhost:8080
+  - service: http_status:404
+```
+
+```bash
+# Restart tunnel agar config baru terbaca
+pm2 restart cloudflared
+```
+
+### Verifikasi Domain
+
+```bash
+# Tunggu 1–5 menit setelah DNS dibuat, lalu cek dari HP sendiri:
+curl -I https://api.namaserver.com
+# Harus: HTTP/2 200
+
+# Cek SSL
+curl -v https://api.namaserver.com 2>&1 | grep "SSL connection"
+# Harus: SSL connection using TLSv1.3
+```
+
+Atau buka dari browser di HP lain / laptop menggunakan data seluler (bukan WiFi yang sama) untuk memastikan akses dari luar jaringan lokal.
+
+> **Tips:**
+> - Cloudflare otomatis menyediakan SSL/TLS — tidak perlu setup Let's Encrypt manual
+> - Jika ingin domain apex (`namaserver.com` tanpa subdomain) → tambahkan di `config.yml` dengan hostname `namaserver.com` dan jalankan `cloudflared tunnel route dns android-server namaserver.com`
+> - Jika ingin proteksi login untuk subdomain tertentu → aktifkan **Cloudflare Access** (lihat bagian [Keamanan](#keamanan))
+
+```
+Checklist Phase 6:
+[ ] Domain terdaftar di Cloudflare, status "Active"
+[ ] Nameserver registrar sudah diganti ke Cloudflare
+[ ] cloudflared tunnel route dns berhasil untuk setiap subdomain
+[ ] config.yml sudah berisi hostname yang benar
+[ ] pm2 restart cloudflared berhasil
+[ ] https://api.namaserver.com bisa diakses dari data seluler
+[ ] HTTPS (TLS) berjalan tanpa error sertifikat
+```
+
+---
+
 ## 🔍 Troubleshooting
 
 ### Termux killed saat layar mati
@@ -742,6 +852,12 @@ cp -r ~/apps ~/storage/backup-config/
 - [cloudflared GitHub Releases](https://github.com/cloudflare/cloudflared/releases) — Download binary ARM64
 - [Cloudflare Tunnel Documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
 - [Cloudflare Zero Trust Access](https://developers.cloudflare.com/cloudflare-one/applications/)
+
+---
+
+## Credit
+
+Panduan ini terinspirasi dari sharing session oleh [**@icksannugrahaa**](https://github.com/icksannugrahaa) — terima kasih sudah berbagi ilmu dan pengalaman setup Android sebagai server. 🙏
 
 ---
 
