@@ -78,7 +78,7 @@ Internet
 
 ## 🚀 Quick Start — Pakai Setup Wizard
 
-Cara tercepat: gunakan **setup wizard** yang otomatis handle Phase 0 sampai Phase 3 (termasuk MCP server untuk AI agent).
+Cara tercepat: gunakan **setup wizard** yang otomatis handle Phase 0 sampai Phase 3 (plus MCP server untuk AI agent sebagai langkah opsional terpisah).
 
 ### Langkah 1 — Di Termux (Phase 0 + 1)
 
@@ -86,18 +86,18 @@ Install Termux dari [F-Droid](https://f-droid.org), lalu jalankan:
 
 ```bash
 # Di Termux
-curl -fsSL https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-termux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-termux.sh | bash
 ```
 
 Atau download manual:
 ```bash
-wget https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-termux.sh
+wget https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-termux.sh
 bash setup-termux.sh
 ```
 
 Wizard ini akan: update Termux → install paket dasar → setup storage → install Ubuntu PRoot → update Ubuntu → buat alias `ubuntu`.
 
-### Langkah 2 — Di Ubuntu PRoot (Phase 2 + 3 + MCP)
+### Langkah 2 — Di Ubuntu PRoot (Phase 2 + 3)
 
 Setelah wizard pertama selesai, masuk ke Ubuntu lalu jalankan wizard kedua:
 
@@ -106,10 +106,19 @@ Setelah wizard pertama selesai, masuk ke Ubuntu lalu jalankan wizard kedua:
 source ~/.bashrc && ubuntu
 
 # Lalu jalankan wizard Phase 2+3
-curl -fsSL https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-ubuntu.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-ubuntu.sh | bash
 ```
 
-Wizard ini akan: install Nginx + Node.js + pm2 → download cloudflared → setup Cloudflare Tunnel (pilih quick tunnel atau permanen) → install MCP server untuk AI agent.
+Wizard ini akan: install Nginx + Node.js + pm2 → download cloudflared → setup Cloudflare Tunnel (pilih quick tunnel atau permanen).
+
+### Langkah 3 — MCP Server untuk AI Agent *(opsional)*
+
+Agar AI agent (Kiro, Claude, Cursor) bisa akses & kontrol server langsung dari chat:
+
+```bash
+# Masih di dalam Ubuntu
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-mcp.sh | bash
+```
 
 > Lihat [dokumentasi lengkap scripts](./scripts/README.md) untuk opsi manual dan troubleshooting.
 
@@ -123,7 +132,7 @@ Jika lebih suka setup manual:
 2. **[Phase 1](./docs/fase-1-setup-ubuntu.md)** — Install Ubuntu di dalam Termux via proot-distro *(±20–40 menit)*
 3. **[Phase 2](./docs/fase-2-fondasi-server.md)** — Install Nginx, Node.js, dan pm2 sebagai fondasi server *(±20–30 menit)*
 4. **[Phase 3](./docs/fase-3-expose-internet.md)** + **[Phase 4](./docs/fase-4-domain-custom.md)** — Expose ke internet via Cloudflare Tunnel + pasang domain custom *(±45–75 menit)*
-   - 🤖 *Bonus di Phase 3:* Setup MCP server agar AI agent (Kiro/Claude/Cursor) bisa akses & kontrol server langsung dari chat
+   - 🤖 *Opsional:* Setup MCP server agar AI agent bisa akses & kontrol server → jalankan `setup-mcp.sh`
 5. **[Phase 5](./docs/fase-5-remote-ssh.md)** *(opsional)* — Remote Termux via SSH dari komputer atau internet *(±20–30 menit)*
 6. **[Phase 6](./docs/fase-6-remote-gui.md)** *(opsional)* — Akses server via GUI browser: Webmin (mirip cPanel) atau VS Code *(±30–45 menit)*
 7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server ([Express](./docs/api-express.md) / [Gin](./docs/api-gin.md) / [FastAPI](./docs/api-fastapi.md) / [Ktor](./docs/api-ktor.md)) atau cloud storage ([Filebrowser](./docs/storage-filebrowser.md) / [Cloudreve](./docs/storage-cloudreve.md)) *(±20–60 menit)*
@@ -141,6 +150,7 @@ Jika lebih suka setup manual:
 | [Phase 2](./docs/fase-2-fondasi-server.md) | Fondasi Server — Nginx + Node.js | 20–30 menit |
 | [Phase 3](./docs/fase-3-expose-internet.md) | Expose ke Internet via Cloudflare Tunnel | 30–45 menit |
 | [Phase 4](./docs/fase-4-domain-custom.md) | Setup Domain Custom | 15–30 menit |
+| ↳ [MCP Server](./scripts/README.md#3-setup-mcpsh--di-ubuntu-proot-opsional) | AI Agent Access — Kiro, Claude, Cursor *(opsional)* | 5–15 menit |
 | [Phase 5](./docs/fase-5-remote-ssh.md) | Remote Access via SSH *(opsional)* | 20–30 menit |
 | [Phase 6](./docs/fase-6-remote-gui.md) | Remote Access via GUI — Webmin & code-server *(opsional)* | 30–45 menit |
 | [Phase 7](./docs/fase-7-web-server-api.md) | Use Case A — Web Server & API | 30–60 menit |

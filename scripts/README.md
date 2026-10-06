@@ -1,6 +1,6 @@
 # Setup Wizard Scripts
 
-Dua script interaktif untuk setup otomatis dari HP Android kosong ke server yang bisa diakses dari internet, termasuk MCP server untuk AI agent.
+Tiga script interaktif untuk setup otomatis dari HP Android kosong ke server yang bisa diakses dari internet, termasuk MCP server untuk AI agent.
 
 ---
 
@@ -8,11 +8,12 @@ Dua script interaktif untuk setup otomatis dari HP Android kosong ke server yang
 
 ```
 scripts/
-├── setup-termux.sh   ← Jalankan di Termux   (Phase 0 + 1)
-└── setup-ubuntu.sh   ← Jalankan di Ubuntu   (Phase 2 + 3 + MCP)
+├── setup-termux.sh   ← Jalankan di Termux          (Phase 0 + 1)
+├── setup-ubuntu.sh   ← Jalankan di Ubuntu           (Phase 2 + 3)
+└── setup-mcp.sh      ← Jalankan di Ubuntu (opsional) (MCP Server)
 ```
 
-> ⚠️ **Urutan penting** — `setup-termux.sh` harus selesai dulu sebelum `setup-ubuntu.sh`.
+> ⚠️ **Urutan penting** — `setup-termux.sh` → `setup-ubuntu.sh` → `setup-mcp.sh` (opsional).
 
 ---
 
@@ -50,7 +51,6 @@ ubuntu             # masuk ke Ubuntu
 **Apa yang dilakukan:**
 - Phase 2: Install Nginx, Node.js LTS, npm, pm2, security headers
 - Phase 3: Download cloudflared (ARM64), setup Cloudflare Tunnel (quick atau permanen)
-- Bonus: Install MCP server agar AI agent (Kiro/Claude/Cursor) bisa akses server
 
 **Jalankan (di dalam Ubuntu):**
 ```bash
@@ -69,7 +69,33 @@ curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Serv
 
 **Output yang dihasilkan:**
 - Semua service berjalan via `pm2`
-- File `~/mcp-server/SETUP_INFO.txt` berisi URL, API key, dan config siap pakai untuk Kiro
+- Server bisa diakses via URL publik Cloudflare Tunnel
+
+---
+
+### 3. `setup-mcp.sh` — Di Ubuntu PRoot *(opsional)*
+
+**Apa yang dilakukan:**
+- Install MCP server agar AI agent (Kiro, Claude, Cursor) bisa akses & kontrol server langsung dari chat
+- Generate API key unik
+- Konfigurasi Nginx route `/mcp`
+- Jalankan MCP server via pm2
+- Simpan config siap pakai ke `~/mcp-server/SETUP_INFO.txt`
+
+**Prasyarat:** `setup-ubuntu.sh` sudah selesai dan tunnel sudah aktif.
+
+**Jalankan (di dalam Ubuntu):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-mcp.sh | bash
+```
+
+**Estimasi waktu:** 5–15 menit
+
+**Setelah selesai, AI agent bisa:**
+- Jalankan shell command di HP kamu
+- Baca & tulis file
+- Monitor CPU/RAM/disk/pm2
+- Deploy kode langsung dari chat
 
 ---
 
@@ -81,7 +107,7 @@ curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Serv
 pm2 list
 ```
 
-Output yang diharapkan:
+Output yang diharapkan (dengan MCP):
 ```
 ┌──────────────────┬────────┬──────────┐
 │ Name             │ Status │ Restarts │
