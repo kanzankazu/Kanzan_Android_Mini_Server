@@ -10,17 +10,17 @@ Halaman ini membantu kamu memilih framework yang paling sesuai. Konfigurasi Ngin
 
 ## Pilih Framework
 
-| | [Node.js + Express](./api-express.md) | [Go + Gin](./api-gin.md) | [Python + FastAPI](./api-fastapi.md) |
-|--|--------------------------------------|--------------------------|--------------------------------------|
-| **RAM usage** | ~50–80 MB | ~10–20 MB | ~60–100 MB |
-| **Performa** | Sedang | Tinggi | Sedang–Tinggi |
-| **Startup time** | ~1–2 detik | <0.1 detik | ~2–3 detik |
-| **Binary/dependency size** | ~200 MB (node_modules) | ~15 MB (single binary) | ~100 MB (venv) |
-| **Sudah terinstall** | ✅ Node.js ada di Phase 2 | ❌ Perlu install Go | ❌ Perlu install Python |
-| **Kemudahan** | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Cocok untuk** | Prototyping, JS developer | Performa, RAM terbatas | Python developer, ML/AI |
+| | [Node.js + Express](./api-express.md) | [Go + Gin](./api-gin.md) | [Python + FastAPI](./api-fastapi.md) | [Kotlin + Ktor](./api-ktor.md) |
+|--|--------------------------------------|--------------------------|--------------------------------------|-------------------------------|
+| **RAM usage** | ~50–80 MB | ~10–20 MB | ~60–100 MB | ~150–250 MB |
+| **Performa** | Sedang | Tinggi | Sedang–Tinggi | Sedang–Tinggi |
+| **Startup time** | ~1–2 detik | <0.1 detik | ~2–3 detik | ~3–5 detik |
+| **Binary/dependency size** | ~200 MB (node_modules) | ~15 MB (single binary) | ~100 MB (venv) | ~12 MB (fat JAR) |
+| **Sudah terinstall** | ✅ Node.js ada di Phase 2 | ❌ Perlu install Go | ❌ Perlu install Python | ❌ Perlu install JDK |
+| **Kemudahan** | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Cocok untuk** | Prototyping, JS developer | Performa, RAM terbatas | Python developer, ML/AI | Kotlin/Android developer |
 
-> **Rekomendasi:** Kalau baru mulai → pakai **Express** (Node.js sudah ada). Kalau RAM jadi perhatian → **Gin**. Kalau familiar Python atau butuh integrasi AI/ML → **FastAPI**.
+> **Rekomendasi:** Kalau baru mulai → pakai **Express** (Node.js sudah ada). Kalau RAM jadi perhatian → **Gin**. Kalau familiar Python atau butuh integrasi AI/ML → **FastAPI**. Kalau latar belakang Android developer → **Ktor**.
 
 ---
 
@@ -29,6 +29,7 @@ Halaman ini membantu kamu memilih framework yang paling sesuai. Konfigurasi Ngin
 - **[→ Node.js + Express](./api-express.md)** — Default, Node.js sudah terinstall di Phase 2
 - **[→ Go + Gin](./api-gin.md)** — Performa terbaik, single binary, RAM paling hemat
 - **[→ Python + FastAPI](./api-fastapi.md)** — Paling mudah, auto docs, cocok untuk AI/ML
+- **[→ Kotlin + Ktor](./api-ktor.md)** — Coroutine-native, cocok untuk Android developer
 
 ---
 

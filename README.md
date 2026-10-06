@@ -86,7 +86,7 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 4. **[Phase 3](./docs/fase-3-expose-internet.md)** + **[Phase 4](./docs/fase-4-domain-custom.md)** — Expose ke internet via Cloudflare Tunnel + pasang domain custom *(±45–75 menit)*
 5. **[Phase 5](./docs/fase-5-remote-ssh.md)** *(opsional)* — Remote Termux via SSH dari komputer atau internet *(±20–30 menit)*
 6. **[Phase 6](./docs/fase-6-remote-gui.md)** *(opsional)* — Akses server via GUI browser: Webmin (mirip cPanel) atau VS Code *(±30–45 menit)*
-7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server ([Express](./docs/api-express.md) / [Gin](./docs/api-gin.md) / [FastAPI](./docs/api-fastapi.md)) atau cloud storage ([Filebrowser](./docs/storage-filebrowser.md) / [Cloudreve](./docs/storage-cloudreve.md)) *(±20–60 menit)*
+7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server ([Express](./docs/api-express.md) / [Gin](./docs/api-gin.md) / [FastAPI](./docs/api-fastapi.md) / [Ktor](./docs/api-ktor.md)) atau cloud storage ([Filebrowser](./docs/storage-filebrowser.md) / [Cloudreve](./docs/storage-cloudreve.md)) *(±20–60 menit)*
 
 ---
 
@@ -107,6 +107,7 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 | ↳ [Node.js + Express](./docs/api-express.md) | API dengan Express (default) | — |
 | ↳ [Go + Gin](./docs/api-gin.md) | API dengan Gin (performa terbaik) | — |
 | ↳ [Python + FastAPI](./docs/api-fastapi.md) | API dengan FastAPI (termudah) | — |
+| ↳ [Kotlin + Ktor](./docs/api-ktor.md) | API dengan Ktor (Android developer) | — |
 | [Phase 8](./docs/fase-8-cloud-storage.md) | Use Case B — Cloud Storage Pribadi | 20–120 menit |
 | ↳ [Filebrowser](./docs/storage-filebrowser.md) | Storage ringan (default) | — |
 | ↳ [Cloudreve](./docs/storage-cloudreve.md) | Storage mirip Google Drive | — |
@@ -137,6 +138,7 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 - [code-server GitHub](https://github.com/coder/code-server)
 - [Gin Web Framework](https://gin-gonic.com/docs/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Ktor Documentation](https://ktor.io/docs/)
 - [Cloudreve Documentation](https://docs.cloudreve.org/)
 - [Nextcloud Documentation](https://docs.nextcloud.com/)
 
