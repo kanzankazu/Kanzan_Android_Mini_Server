@@ -1,4 +1,4 @@
-# Phase 5: Expose ke Internet via Cloudflare Tunnel
+# Phase 3: Expose ke Internet via Cloudflare Tunnel
 
 > **Durasi estimasi:** 30–45 menit
 
@@ -6,7 +6,7 @@ Membuat server HP Android dapat diakses dari internet dengan HTTPS — tanpa por
 
 **Prasyarat:**
 - Akun Cloudflare gratis ([cloudflare.com](https://cloudflare.com))
-- Domain yang di-manage Cloudflare (diperlukan untuk tunnel permanen — lihat [Phase 6](./fase-6-domain-custom.md))
+- Domain yang di-manage Cloudflare (diperlukan untuk tunnel permanen — lihat [Phase 4](./fase-4-domain-custom.md))
 
 ---
 
@@ -113,7 +113,7 @@ URL ini bersifat sementara dan akan berubah setiap kali tunnel di-restart. Cocok
 
 ## Ringkasan Semua Service
 
-Setelah Phase 5, `pm2 list` harus menampilkan:
+Setelah Phase 3, `pm2 list` harus menampilkan:
 
 ```
 ┌─────────────┬────────┬─────────┐
@@ -127,7 +127,7 @@ Setelah Phase 5, `pm2 list` harus menampilkan:
 
 ---
 
-## ✅ Checklist Phase 5
+## ✅ Checklist Phase 3
 
 ```
 [ ] cloudflared --version tampil tanpa error
@@ -141,4 +141,4 @@ Setelah Phase 5, `pm2 list` harus menampilkan:
 
 ---
 
-[← Phase 4: Cloud Storage](./fase-4-cloud-storage.md) | [Kembali ke README](../README.md) | [Phase 6: Domain Custom →](./fase-6-domain-custom.md)
+[← Phase 2: Fondasi Server](./fase-2-fondasi-server.md) | [Kembali ke README](../README.md) | [Phase 4: Domain Custom →](./fase-4-domain-custom.md)

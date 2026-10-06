@@ -1,4 +1,4 @@
-# Phase 3: Use Case A — Web Server & API
+# Phase 5: Use Case A — Web Server & API
 
 > **Durasi estimasi:** 30–45 menit
 
@@ -134,7 +134,7 @@ nginx -t && service nginx reload
 
 ---
 
-## ✅ Checklist Phase 3
+## ✅ Checklist Phase 5
 
 ```
 [ ] pm2 start my-api → status "online"
@@ -145,4 +145,4 @@ nginx -t && service nginx reload
 
 ---
 
-[← Phase 2: Fondasi Server](./fase-2-fondasi-server.md) | [Kembali ke README](../README.md) | [Phase 4: Cloud Storage →](./fase-4-cloud-storage.md)
+[← Phase 6: Remote GUI](./fase-6-remote-gui.md) | [Kembali ke README](../README.md) | [Phase 8: Cloud Storage →](./fase-8-cloud-storage.md)

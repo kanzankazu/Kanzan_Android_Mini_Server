@@ -1,8 +1,8 @@
-# Phase 6: Setup Domain Custom
+# Phase 4: Setup Domain Custom
 
 > **Durasi estimasi:** 15–30 menit
 >
-> **Prasyarat:** [Phase 5](./fase-5-expose-internet.md) sudah selesai — tunnel sudah berjalan dan `pm2 logs cloudflared` menampilkan "Connection established"
+> **Prasyarat:** [Phase 3](./fase-3-expose-internet.md) sudah selesai — tunnel sudah berjalan dan `pm2 logs cloudflared` menampilkan "Connection established"
 
 Panduan ini menggunakan domain yang **sudah kamu miliki** (dibeli dari registrar seperti Niagahoster, Namecheap, GoDaddy, dll). Cloudflare bertindak sebagai nameserver sekaligus proxy gratis.
 
@@ -111,7 +111,7 @@ Atau buka dari browser menggunakan data seluler (bukan WiFi yang sama) untuk mem
 
 ---
 
-## ✅ Checklist Phase 6
+## ✅ Checklist Phase 4
 
 ```
 [ ] Domain terdaftar di Cloudflare, status "Active"
@@ -125,4 +125,4 @@ Atau buka dari browser menggunakan data seluler (bukan WiFi yang sama) untuk mem
 
 ---
 
-[← Phase 5: Expose ke Internet](./fase-5-expose-internet.md) | [Kembali ke README](../README.md)
+[← Phase 3: Expose ke Internet](./fase-3-expose-internet.md) | [Kembali ke README](../README.md) | [Phase 5: Remote SSH →](./fase-5-remote-ssh.md)

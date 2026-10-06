@@ -1,6 +1,6 @@
 # Tips & Best Practices
 
-Panduan ini mengasumsikan kamu sudah menyelesaikan setup sampai [Phase 6](./fase-6-domain-custom.md). Tips di bawah membantu menjaga server tetap aman, stabil, dan mudah di-maintain.
+Panduan ini mengasumsikan kamu sudah menyelesaikan setup sampai [Phase 4](./fase-4-domain-custom.md). Tips di bawah membantu menjaga server tetap aman, stabil, dan mudah di-maintain.
 
 ---
 

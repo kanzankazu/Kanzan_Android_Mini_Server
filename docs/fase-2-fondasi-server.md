@@ -88,4 +88,4 @@ mkdir -p ~/.cloudflared
 
 ---
 
-[← Phase 1: Setup Ubuntu](./fase-1-setup-ubuntu.md) | [Kembali ke README](../README.md) | [Phase 3: Web Server & API →](./fase-3-web-server-api.md)
+[← Phase 1: Setup Ubuntu](./fase-1-setup-ubuntu.md) | [Kembali ke README](../README.md) | [Phase 3: Expose ke Internet →](./fase-3-expose-internet.md)

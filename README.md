@@ -78,13 +78,15 @@ Internet
 
 ## Quick Start
 
-Lima langkah untuk dari HP kosong ke server yang bisa diakses dari internet:
+Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 
 1. **[Phase 0](./docs/fase-0-persiapan-termux.md)** — Install Termux via F-Droid, setup wakelock & battery optimization *(±15–30 menit)*
 2. **[Phase 1](./docs/fase-1-setup-ubuntu.md)** — Install Ubuntu di dalam Termux via proot-distro *(±20–40 menit)*
 3. **[Phase 2](./docs/fase-2-fondasi-server.md)** — Install Nginx, Node.js, dan pm2 sebagai fondasi server *(±20–30 menit)*
-4. **[Phase 3](./docs/fase-3-web-server-api.md)** atau **[Phase 4](./docs/fase-4-cloud-storage.md)** — Pilih use case: API server atau cloud storage pribadi *(±20–45 menit)*
-5. **[Phase 5](./docs/fase-5-expose-internet.md)** + **[Phase 6](./docs/fase-6-domain-custom.md)** — Expose ke internet via Cloudflare Tunnel + pasang domain custom *(±45–75 menit)*
+4. **[Phase 3](./docs/fase-3-expose-internet.md)** + **[Phase 4](./docs/fase-4-domain-custom.md)** — Expose ke internet via Cloudflare Tunnel + pasang domain custom *(±45–75 menit)*
+5. **[Phase 5](./docs/fase-5-remote-ssh.md)** *(opsional)* — Remote Termux via SSH dari komputer atau internet *(±20–30 menit)*
+6. **[Phase 6](./docs/fase-6-remote-gui.md)** *(opsional)* — Akses server via GUI browser: Webmin (mirip cPanel) atau VS Code *(±30–45 menit)*
+7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server atau cloud storage pribadi *(±20–45 menit)*
 
 ---
 
@@ -97,10 +99,12 @@ Lima langkah untuk dari HP kosong ke server yang bisa diakses dari internet:
 | [Phase 0](./docs/fase-0-persiapan-termux.md) | Persiapan & Install Termux | 15–30 menit |
 | [Phase 1](./docs/fase-1-setup-ubuntu.md) | Setup Ubuntu via PRoot | 20–40 menit |
 | [Phase 2](./docs/fase-2-fondasi-server.md) | Fondasi Server — Nginx + Node.js | 20–30 menit |
-| [Phase 3](./docs/fase-3-web-server-api.md) | Use Case A — Web Server & API | 30–45 menit |
-| [Phase 4](./docs/fase-4-cloud-storage.md) | Use Case B — Cloud Storage Pribadi | 20–30 menit |
-| [Phase 5](./docs/fase-5-expose-internet.md) | Expose ke Internet via Cloudflare Tunnel | 30–45 menit |
-| [Phase 6](./docs/fase-6-domain-custom.md) | Setup Domain Custom | 15–30 menit |
+| [Phase 3](./docs/fase-3-expose-internet.md) | Expose ke Internet via Cloudflare Tunnel | 30–45 menit |
+| [Phase 4](./docs/fase-4-domain-custom.md) | Setup Domain Custom | 15–30 menit |
+| [Phase 5](./docs/fase-5-remote-ssh.md) | Remote Access via SSH *(opsional)* | 20–30 menit |
+| [Phase 6](./docs/fase-6-remote-gui.md) | Remote Access via GUI — Webmin & code-server *(opsional)* | 30–45 menit |
+| [Phase 7](./docs/fase-7-web-server-api.md) | Use Case A — Web Server & API | 30–45 menit |
+| [Phase 8](./docs/fase-8-cloud-storage.md) | Use Case B — Cloud Storage Pribadi | 20–30 menit |
 
 ### Referensi
 
@@ -123,6 +127,8 @@ Lima langkah untuk dari HP kosong ke server yang bisa diakses dari internet:
 - [cloudflared GitHub Releases](https://github.com/cloudflare/cloudflared/releases)
 - [Cloudflare Tunnel Documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
 - [Cloudflare Zero Trust Access](https://developers.cloudflare.com/cloudflare-one/applications/)
+- [Webmin Documentation](https://webmin.com/docs/)
+- [code-server GitHub](https://github.com/coder/code-server)
 
 ---
 
