@@ -207,6 +207,316 @@ Atau langsung dari [Cloudflare Dashboard](https://dash.cloudflare.com) → Zero 
 
 ---
 
+## 🤖 Bonus: Hubungkan AI Agent (Kiro/Claude/Cursor) ke Server
+
+Setelah tunnel aktif, kamu bisa memberikan AI agent akses penuh ke server HP Android-mu via **MCP (Model Context Protocol)**. Dengan ini, AI agent bisa membaca file, menjalankan command, deploy kode, dan memonitor server — semuanya langsung dari chat.
+
+### Apa itu MCP?
+
+MCP adalah protokol standar yang memungkinkan AI agent (seperti Kiro, Claude Desktop, Cursor) terhubung ke tool eksternal. Kamu deploy MCP server di HP Android, lalu AI agent connect ke sana via tunnel yang sudah aktif.
+
+### Install Node.js MCP Server di HP Android
+
+```bash
+# Pastikan sudah di dalam Ubuntu PRoot
+# Buat folder project MCP server
+mkdir -p ~/mcp-server && cd ~/mcp-server
+
+# Init project
+npm init -y
+
+# Install dependencies
+npm install @modelcontextprotocol/sdk express
+```
+
+Buat file server utama:
+
+```bash
+nano ~/mcp-server/index.js
+```
+
+```javascript
+#!/usr/bin/env node
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+import { exec } from "child_process";
+import { promisify } from "util";
+import fs from "fs/promises";
+import path from "path";
+
+const execAsync = promisify(exec);
+const server = new McpServer({ name: "android-server", version: "1.0.0" });
+
+// Tool: jalankan shell command
+server.tool(
+  "run_command",
+  "Jalankan shell command di server Android",
+  { command: z.string().describe("Shell command yang akan dijalankan") },
+  async ({ command }) => {
+    try {
+      const { stdout, stderr } = await execAsync(command, { timeout: 30000 });
+      return { content: [{ type: "text", text: stdout || stderr || "(no output)" }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool: baca file
+server.tool(
+  "read_file",
+  "Baca isi file di server Android",
+  { file_path: z.string().describe("Path file yang ingin dibaca") },
+  async ({ file_path }) => {
+    try {
+      const content = await fs.readFile(file_path, "utf-8");
+      return { content: [{ type: "text", text: content }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool: tulis file
+server.tool(
+  "write_file",
+  "Tulis atau buat file di server Android",
+  {
+    file_path: z.string().describe("Path file tujuan"),
+    content: z.string().describe("Konten yang akan ditulis"),
+  },
+  async ({ file_path, content }) => {
+    try {
+      await fs.mkdir(path.dirname(file_path), { recursive: true });
+      await fs.writeFile(file_path, content, "utf-8");
+      return { content: [{ type: "text", text: `File berhasil ditulis: ${file_path}` }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool: list direktori
+server.tool(
+  "list_directory",
+  "Lihat isi direktori di server Android",
+  { dir_path: z.string().describe("Path direktori").default("/root") },
+  async ({ dir_path }) => {
+    try {
+      const { stdout } = await execAsync(`ls -la "${dir_path}"`);
+      return { content: [{ type: "text", text: stdout }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool: cek status server
+server.tool(
+  "server_status",
+  "Cek status CPU, RAM, disk, dan semua service yang berjalan",
+  {},
+  async () => {
+    try {
+      const { stdout: pm2 } = await execAsync("pm2 jlist");
+      const { stdout: disk } = await execAsync("df -h /");
+      const { stdout: mem } = await execAsync("free -h");
+      const { stdout: cpu } = await execAsync("top -bn1 | head -5");
+      const result = `=== PM2 Services ===\n${pm2}\n\n=== Disk ===\n${disk}\n\n=== Memory ===\n${mem}\n\n=== CPU ===\n${cpu}`;
+      return { content: [{ type: "text", text: result }] };
+    } catch (err) {
+      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+Update `package.json` agar support ES modules:
+
+```bash
+# Edit package.json, tambahkan "type": "module"
+npm pkg set type=module
+npm pkg set main=index.js
+
+# Install zod (validation)
+npm install zod
+```
+
+Jalankan MCP server via HTTP menggunakan wrapper agar bisa diakses via tunnel:
+
+```bash
+nano ~/mcp-server/http-bridge.js
+```
+
+```javascript
+import { spawn } from "child_process";
+import express from "express";
+
+const app = express();
+app.use(express.json());
+
+// Simple HTTP-to-stdio bridge untuk MCP
+app.post("/mcp", (req, res) => {
+  const proc = spawn("node", ["/root/mcp-server/index.js"], {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+
+  proc.stdin.write(JSON.stringify(req.body) + "\n");
+  proc.stdin.end();
+
+  let output = "";
+  proc.stdout.on("data", (d) => (output += d.toString()));
+  proc.stderr.on("data", (d) => console.error(d.toString()));
+
+  proc.on("close", () => {
+    try {
+      res.json(JSON.parse(output));
+    } catch {
+      res.status(500).json({ error: "Invalid MCP response" });
+    }
+  });
+});
+
+app.listen(3001, () => console.log("MCP HTTP bridge running on :3001"));
+```
+
+Jalankan dengan pm2:
+
+```bash
+pm2 start ~/mcp-server/http-bridge.js --name mcp-server
+pm2 save
+```
+
+### Tambahkan Route di Nginx
+
+```bash
+nano /etc/nginx/sites-available/default
+```
+
+Tambahkan di dalam block `server`:
+
+```nginx
+# MCP Server untuk AI Agent
+location /mcp {
+    proxy_pass http://localhost:3001/mcp;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
+
+Reload Nginx:
+
+```bash
+nginx -t && nginx -s reload
+```
+
+### Tambahkan ke Cloudflare Tunnel Config
+
+MCP server akan otomatis tersedia di `https://api.domain.com/mcp` karena routing sudah lewat Nginx. Tidak perlu konfigurasi tunnel baru.
+
+Untuk quick tunnel, endpoint MCP ada di URL yang didapat + `/mcp`:
+```
+https://random-name-abc123.trycloudflare.com/mcp
+```
+
+### Hubungkan ke Kiro (AI Agent)
+
+Buat atau edit file `.kiro/settings/mcp.json` di project kamu:
+
+```json
+{
+  "mcpServers": {
+    "android-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "env": {
+        "MCP_SERVER_URL": "https://api.domain.com/mcp"
+      }
+    }
+  }
+}
+```
+
+> Ganti `https://api.domain.com/mcp` dengan URL tunnel kamu.
+
+Setelah disimpan, Kiro otomatis reconnect dan tools `run_command`, `read_file`, `write_file`, `list_directory`, `server_status` langsung tersedia.
+
+### Verifikasi Koneksi
+
+Test endpoint MCP via curl dari komputer:
+
+```bash
+curl -X POST https://api.domain.com/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+Jika berhasil, response akan menampilkan daftar tools yang tersedia.
+
+### 🔒 Keamanan MCP Server
+
+MCP server memberi akses **sangat luas** ke server kamu. Wajib tambahkan autentikasi:
+
+```bash
+nano ~/mcp-server/http-bridge.js
+```
+
+Tambahkan middleware API key sebelum route `/mcp`:
+
+```javascript
+// Tambahkan di bagian atas, setelah app.use(express.json())
+const API_KEY = process.env.MCP_API_KEY || "ganti-dengan-key-rahasia";
+
+app.use("/mcp", (req, res, next) => {
+  const key = req.headers["x-api-key"];
+  if (key !== API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+});
+```
+
+Set API key via environment variable:
+
+```bash
+# Simpan ke file .env
+echo "MCP_API_KEY=isi-dengan-random-string-panjang" > ~/mcp-server/.env
+
+# Restart dengan env
+pm2 delete mcp-server
+pm2 start ~/mcp-server/http-bridge.js --name mcp-server \
+  --env-from ~/mcp-server/.env
+pm2 save
+```
+
+Update konfigurasi MCP di Kiro dengan header API key:
+
+```json
+{
+  "mcpServers": {
+    "android-server": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "env": {
+        "MCP_SERVER_URL": "https://api.domain.com/mcp",
+        "MCP_API_KEY": "isi-dengan-key-yang-sama"
+      }
+    }
+  }
+}
+```
+
+> ⚠️ Jangan commit file `.env` atau `mcp.json` yang berisi API key ke Git publik.
+
+---
+
 ## ✅ Checklist Phase 3
 
 ```
@@ -217,6 +527,11 @@ Atau langsung dari [Cloudflare Dashboard](https://dash.cloudflare.com) → Zero 
 [ ] pm2 logs cloudflared menampilkan "Connection established"
 [ ] https://api.domain.com bisa diakses dari data seluler
 [ ] pm2 save sudah dijalankan
+
+[ ] (Opsional) MCP server berjalan: pm2 list menampilkan 'mcp-server' online
+[ ] (Opsional) curl ke /mcp mengembalikan daftar tools
+[ ] (Opsional) API key sudah di-set dan .env tidak di-commit ke Git
+[ ] (Opsional) .kiro/settings/mcp.json sudah dikonfigurasi di project Kiro
 ```
 
 ---
