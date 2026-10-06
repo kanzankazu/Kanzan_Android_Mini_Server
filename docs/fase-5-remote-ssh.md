@@ -312,6 +312,94 @@ ssh-keygen -R "[IP-HP]:8022"
 
 ---
 
+## 🔒 Security Tips
+
+### Nonaktifkan Password Auth — Wajib Setelah Setup SSH Key
+
+Setelah SSH key berfungsi (Opsi dari seksi sebelumnya), matikan login via password agar brute force tidak mungkin dilakukan:
+
+```bash
+# Di Termux, edit konfigurasi sshd
+nano $PREFIX/etc/ssh/sshd_config
+```
+
+Cari dan ubah baris berikut (atau tambahkan jika belum ada):
+
+```
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+PermitEmptyPasswords no
+```
+
+Restart sshd:
+
+```bash
+pkill sshd && sshd
+```
+
+Verifikasi — login dari komputer lain tanpa key harus ditolak:
+
+```bash
+ssh -o PubkeyAuthentication=no u0_a123@192.168.1.105 -p 8022
+# Harus: Permission denied (publickey)
+```
+
+> ⚠️ Jangan matikan password auth sebelum memastikan SSH key benar-benar berfungsi. Kalau terkunci, buka Termux langsung di HP untuk mengembalikan konfigurasi.
+
+### Ganti Port SSH dari Default (Opsional)
+
+Port 8022 sudah non-standard, tapi bisa diganti lebih jauh untuk mengurangi noise dari scanner otomatis:
+
+```bash
+nano $PREFIX/etc/ssh/sshd_config
+# Ganti: Port 8022
+# Menjadi: Port 2222 (atau angka lain 1024–65535)
+```
+
+Update `~/.ssh/config` di komputer client sesuai port baru.
+
+### Batasi Waktu Idle SSH
+
+Otomatis putus koneksi SSH yang tidak aktif untuk mencegah sesi terbengkalai:
+
+```bash
+nano $PREFIX/etc/ssh/sshd_config
+```
+
+Tambahkan:
+
+```
+ClientAliveInterval 300
+ClientAliveCountMax 2
+```
+
+Ini akan disconnect sesi yang idle lebih dari 10 menit (300 detik × 2).
+
+### Aktifkan Firewall di Ubuntu PRoot (UFW)
+
+Install dan konfigurasi UFW untuk membatasi koneksi yang masuk:
+
+```bash
+# Di Ubuntu PRoot
+apt install ufw -y
+
+# Default: tolak semua masuk, izinkan semua keluar
+ufw default deny incoming
+ufw default allow outgoing
+
+# Izinkan hanya port yang dipakai
+ufw allow 80/tcp    # Nginx
+ufw allow 8022/tcp  # SSH Termux (dari jaringan lokal)
+
+# Aktifkan (di PRoot, gunakan ufw enable --force)
+ufw enable
+ufw status verbose
+```
+
+> Di PRoot Android, UFW berfungsi sebagai filter tambahan meski tidak sekuat iptables di kernel penuh.
+
+---
+
 ## Langkah Selanjutnya
 
 - **[Phase 6](./fase-6-remote-gui.md)** — Akses server via GUI berbasis browser (mirip cPanel)

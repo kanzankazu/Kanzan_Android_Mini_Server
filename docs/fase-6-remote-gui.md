@@ -276,6 +276,86 @@ cat ~/.termux/boot/start-ssh.sh
 
 ---
 
+## 🔒 Security Tips
+
+### Generate Password Kuat untuk Setiap Panel
+
+Jangan gunakan password yang sama untuk Webmin dan code-server. Generate unik untuk masing-masing:
+
+```bash
+# Generate password acak 32 karakter
+openssl rand -base64 32
+
+# Jalankan dua kali — satu untuk Webmin, satu untuk code-server
+openssl rand -base64 32
+```
+
+Simpan di password manager (Bitwarden, KeePass, dll) — jangan tulis di file plain text di server.
+
+### Hardening Webmin
+
+Setelah Webmin berjalan, lakukan konfigurasi keamanan berikut:
+
+**Batasi akses IP (jika akses dari IP tetap):**
+1. Webmin → **Webmin Configuration** → **IP Access Control**
+2. Tambahkan IP yang diizinkan
+3. Atau biarkan kosong dan andalkan Cloudflare Zero Trust (lebih fleksibel)
+
+**Aktifkan Two-Factor Authentication di Webmin:**
+1. Webmin → **Webmin Configuration** → **Two-Factor Authentication**
+2. Pilih **Google Authenticator**
+3. Scan QR code dengan app authenticator di HP lain
+
+**Nonaktifkan modul Webmin yang tidak dipakai:**
+1. Webmin → **Webmin Configuration** → **Webmin Modules**
+2. Nonaktifkan modul yang tidak relevan (contoh: modul untuk service yang tidak diinstall)
+
+### Proteksi code-server
+
+Pastikan code-server hanya bisa diakses via tunnel, tidak dari jaringan lokal langsung:
+
+```bash
+# Verifikasi bind address hanya 127.0.0.1
+grep "bind-addr" ~/.config/code-server/config.yaml
+# Harus: bind-addr: 127.0.0.1:8888
+```
+
+Aktifkan juga autentikasi password yang kuat:
+
+```bash
+# Ganti password code-server
+nano ~/.config/code-server/config.yaml
+# Update baris: password: <password-baru-yang-kuat>
+
+pm2 restart code-server
+```
+
+### Wajib: Cloudflare Zero Trust Access untuk Semua Panel
+
+Ini lapisan proteksi paling penting — tanpanya, siapapun yang tahu URL panel bisa mencoba login.
+
+Pasang Cloudflare Zero Trust Access untuk **setiap** panel yang diekspos:
+
+```
+Cloudflare Zero Trust Dashboard (one.dash.cloudflare.com)
+  → Access → Applications → Add an application
+  → Self-hosted
+  → Application domain: panel.kamu.com
+  → Policy name: "Only Me"
+  → Include: Emails → kamu@gmail.com
+```
+
+Ulangi untuk `code.kamu.com` dan subdomain panel lainnya. Sekarang setiap akses ke panel akan meminta verifikasi email OTP dari Cloudflare dulu, bahkan sebelum halaman login panel muncul.
+
+### Monitor Log Akses Panel
+
+Cek siapa saja yang mengakses panel dari Cloudflare Zero Trust:
+
+1. Cloudflare Zero Trust Dashboard → **Access** → **Logs**
+2. Filter per application untuk melihat riwayat login
+
+---
+
 ## Setup Keduanya Sekaligus
 
 Jika ingin pasang Webmin dan code-server bersamaan, konfigurasi lengkap cloudflared-nya:

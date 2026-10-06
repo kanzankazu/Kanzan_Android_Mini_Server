@@ -48,6 +48,55 @@ source ~/.bashrc
 
 ---
 
+## 🔒 Security Tips
+
+### Update Sistem Secara Berkala
+
+Jalankan update setiap minggu untuk menutup celah keamanan di package Ubuntu:
+
+```bash
+apt update && apt upgrade -y
+```
+
+### Nonaktifkan Login Root via Password
+
+Jika SSH diinstall di Ubuntu PRoot (bukan hanya di Termux), pastikan root tidak bisa login via password langsung:
+
+```bash
+# Di Ubuntu PRoot — cek sshd_config jika ada
+grep "PermitRootLogin" /etc/ssh/sshd_config
+# Pastikan nilainya: PermitRootLogin prohibit-password
+# Artinya root hanya bisa login via SSH key, bukan password
+```
+
+### Nonaktifkan Service yang Tidak Dipakai
+
+Jangan jalankan service yang tidak dibutuhkan — setiap service aktif adalah potensi attack surface:
+
+```bash
+# Cek semua service yang berjalan
+service --status-all 2>/dev/null | grep ' + '
+
+# Contoh matikan service yang tidak dipakai (sesuaikan)
+service bluetooth stop 2>/dev/null || true
+```
+
+### Buat User Non-Root untuk Aplikasi (Opsional tapi Direkomendasikan)
+
+Menjalankan aplikasi sebagai root adalah kebiasaan buruk. Buat user terpisah untuk aplikasi:
+
+```bash
+# Buat user 'appuser' tanpa password login
+useradd -r -s /bin/false appuser
+
+# Jalankan Node.js app sebagai appuser via pm2
+# pm2 start index.js --name my-api --user appuser
+```
+
+> Di PRoot Android, isolation user tidak sekuat bare metal Linux, tapi tetap merupakan praktik terbaik yang baik untuk dibiasakan.
+
+---
+
 ## ✅ Checklist Phase 1
 
 ```

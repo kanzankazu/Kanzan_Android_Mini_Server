@@ -111,6 +111,57 @@ Atau buka dari browser menggunakan data seluler (bukan WiFi yang sama) untuk mem
 
 ---
 
+## 🔒 Security Tips
+
+### Aktifkan SSL/TLS Mode Full (Strict)
+
+Cloudflare default menggunakan mode "Flexible" yang hanya enkripsi koneksi browser → Cloudflare, tapi tidak ke server. Ganti ke **Full (Strict)** untuk enkripsi end-to-end:
+
+Di [Cloudflare Dashboard](https://dash.cloudflare.com):
+1. Pilih domain → **SSL/TLS** → **Overview**
+2. Ganti mode dari **Flexible** ke **Full** atau **Full (Strict)**
+
+> Untuk Full (Strict), tunnel cloudflared sudah menangani sertifikat dari sisi server secara otomatis — kamu tidak perlu setup Let's Encrypt manual.
+
+### Aktifkan HSTS
+
+HSTS (HTTP Strict Transport Security) memaksa browser selalu pakai HTTPS:
+
+1. Cloudflare Dashboard → **SSL/TLS** → **Edge Certificates**
+2. **HTTP Strict Transport Security (HSTS)** → Enable
+3. Max Age: `6 months` untuk mulai, naikkan ke `1 year` setelah yakin HTTPS stabil
+4. Centang **Include subdomains** jika semua subdomain pakai HTTPS
+
+### Aktifkan Bot Fight Mode
+
+Blokir traffic dari bot scraper dan scanner otomatis secara gratis:
+
+1. Cloudflare Dashboard → **Security** → **Bots**
+2. **Bot Fight Mode** → On
+
+### Nonaktifkan Subdomain yang Tidak Dipakai
+
+Setiap CNAME aktif di DNS adalah attack surface potensial. Hapus DNS record yang tidak lagi dipakai:
+
+1. Cloudflare Dashboard → **DNS** → **Records**
+2. Hapus CNAME yang sudah tidak ada service-nya
+
+### Aktifkan Always Use HTTPS
+
+Pastikan semua request HTTP di-redirect otomatis ke HTTPS:
+
+1. Cloudflare Dashboard → **SSL/TLS** → **Edge Certificates**
+2. **Always Use HTTPS** → On
+
+### Minimum TLS Version
+
+Nonaktifkan TLS lama (TLS 1.0 dan 1.1) yang sudah tidak aman:
+
+1. Cloudflare Dashboard → **SSL/TLS** → **Edge Certificates**
+2. **Minimum TLS Version** → **TLS 1.2**
+
+---
+
 ## ✅ Checklist Phase 4
 
 ```

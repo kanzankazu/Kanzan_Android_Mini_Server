@@ -1,100 +1,44 @@
-# Phase 5: Use Case A — Web Server & API
+# Phase 7: Use Case A — Web Server & API
 
-> **Durasi estimasi:** 30–45 menit
+> **Durasi estimasi:** 30–60 menit (tergantung framework yang dipilih)
 
-Membuat API sederhana menggunakan Express.js, dijalankan via pm2, dan di-proxy oleh Nginx.
+Membuat API yang berjalan di HP Android, dikelola via pm2, dan di-proxy oleh Nginx.
 
----
-
-## Buat Aplikasi Express
-
-```bash
-cd ~/apps/my-api
-npm init -y
-npm install express
-nano index.js
-```
-
-Isi `index.js`:
-
-```javascript
-const express = require('express');
-const os      = require('os');
-
-const app  = express();
-const PORT = 3000;
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.json({
-    message : 'Hello from Android Server! 🤖',
-    server  : 'Node.js + Express on Android',
-    time    : new Date().toISOString()
-  });
-});
-
-app.get('/api/status', (req, res) => {
-  const uptimeSecs = process.uptime();
-  const hours      = Math.floor(uptimeSecs / 3600);
-  const minutes    = Math.floor((uptimeSecs % 3600) / 60);
-  const seconds    = Math.floor(uptimeSecs % 60);
-
-  res.json({
-    status     : 'online',
-    uptime     : `${hours}h ${minutes}m ${seconds}s`,
-    memory     : {
-      total_mb : Math.round(os.totalmem() / 1024 / 1024),
-      free_mb  : Math.round(os.freemem() / 1024 / 1024),
-      used_pct : Math.round((1 - os.freemem() / os.totalmem()) * 100)
-    },
-    cpu        : os.cpus()[0].model,
-    platform   : os.platform(),
-    arch       : os.arch(),
-    node_ver   : process.version,
-    timestamp  : new Date().toISOString()
-  });
-});
-
-app.get('/api/hello/:name', (req, res) => {
-  const { name } = req.params;
-  res.json({
-    message : `Halo, ${name}! Kamu sedang ngobrol sama server yang jalan di HP Android. 👋`,
-    from    : 'Android Mini Server'
-  });
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[${new Date().toISOString()}] Server berjalan di port ${PORT}`);
-});
-```
+Halaman ini membantu kamu memilih framework yang paling sesuai. Konfigurasi Nginx dan langkah pm2 berlaku untuk semua pilihan.
 
 ---
 
-## Jalankan dengan pm2
+## Pilih Framework
 
-```bash
-pm2 start index.js --name my-api
-```
+| | [Node.js + Express](./api-express.md) | [Go + Gin](./api-gin.md) | [Python + FastAPI](./api-fastapi.md) |
+|--|--------------------------------------|--------------------------|--------------------------------------|
+| **RAM usage** | ~50–80 MB | ~10–20 MB | ~60–100 MB |
+| **Performa** | Sedang | Tinggi | Sedang–Tinggi |
+| **Startup time** | ~1–2 detik | <0.1 detik | ~2–3 detik |
+| **Binary/dependency size** | ~200 MB (node_modules) | ~15 MB (single binary) | ~100 MB (venv) |
+| **Sudah terinstall** | ✅ Node.js ada di Phase 2 | ❌ Perlu install Go | ❌ Perlu install Python |
+| **Kemudahan** | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Cocok untuk** | Prototyping, JS developer | Performa, RAM terbatas | Python developer, ML/AI |
 
-Verifikasi:
-
-```bash
-pm2 list
-curl http://localhost:3000
-```
+> **Rekomendasi:** Kalau baru mulai → pakai **Express** (Node.js sudah ada). Kalau RAM jadi perhatian → **Gin**. Kalau familiar Python atau butuh integrasi AI/ML → **FastAPI**.
 
 ---
 
-## Konfigurasi Nginx
+## Pilih dan Mulai
 
-Buat konfigurasi virtual host:
+- **[→ Node.js + Express](./api-express.md)** — Default, Node.js sudah terinstall di Phase 2
+- **[→ Go + Gin](./api-gin.md)** — Performa terbaik, single binary, RAM paling hemat
+- **[→ Python + FastAPI](./api-fastapi.md)** — Paling mudah, auto docs, cocok untuk AI/ML
+
+---
+
+## Konfigurasi Nginx (Sama untuk Semua Framework)
+
+Semua framework di atas berjalan di port 3000. Konfigurasi Nginx berikut berlaku untuk semuanya:
 
 ```bash
 nano /etc/nginx/sites-available/my-api
 ```
-
-Isi konfigurasi:
 
 ```nginx
 server {
@@ -124,21 +68,41 @@ nginx -t && service nginx reload
 
 ---
 
-## Endpoint yang Tersedia
+## 🔒 Security Tips (Berlaku untuk Semua Framework)
 
-| Endpoint | Deskripsi |
-|----------|-----------|
-| `GET /` | Info server + timestamp |
-| `GET /api/status` | Uptime, memory, CPU, platform |
-| `GET /api/hello/:name` | Greeting personal |
+### Nginx Rate Limiting
+
+Tambahkan rate limiting di level Nginx sebagai lapisan pertama pertahanan:
+
+```bash
+# Sudah dikonfigurasi di Phase 2 jika mengikuti security tips
+# Pastikan zone limit_req_zone aktif di /etc/nginx/conf.d/rate-limit.conf
+
+# Tambahkan di blok location {} di konfigurasi virtual host:
+#   limit_req zone=api_limit burst=20 nodelay;
+```
+
+### Sembunyikan Versi Server
+
+```bash
+# Pastikan server_tokens off aktif
+grep "server_tokens" /etc/nginx/conf.d/security-headers.conf
+```
+
+### Set NODE_ENV / Environment Production
+
+Setiap framework punya cara untuk mode production — lihat di halaman masing-masing framework.
 
 ---
 
-## ✅ Checklist Phase 5
+## ✅ Checklist Phase 7
 
 ```
-[ ] pm2 start my-api → status "online"
+[ ] Framework sudah dipilih dan diinstall
+[ ] API berjalan di port 3000
+[ ] pm2 start → status "online"
 [ ] curl http://localhost:3000 mengembalikan JSON
+[ ] Konfigurasi Nginx aktif dan reload berhasil
 [ ] curl http://localhost (port 80) mengembalikan JSON
 [ ] API bisa diakses dari device lain di WiFi yang sama
 ```

@@ -16,32 +16,189 @@ Panduan ini mengasumsikan kamu sudah menyelesaikan setup sampai [Phase 4](./fase
 
 ## Keamanan
 
-### Ganti Password Filebrowser
+> Keamanan bersifat berlapis — semakin banyak layer yang aktif, semakin sulit penyerang masuk. Implementasikan semua yang relevan, bukan hanya satu.
 
-Ganti password default segera setelah setup pertama:
+### Checklist Keamanan Keseluruhan
+
+Gunakan ini sebagai audit setelah semua fase selesai:
+
+```
+[ ] Password semua service sudah diganti dari default (Filebrowser, Webmin, code-server)
+[ ] SSH password auth dinonaktifkan — hanya SSH key yang bisa login
+[ ] Cloudflare Zero Trust Access aktif untuk semua panel publik
+[ ] SSL/TLS mode Full atau Full (Strict) di Cloudflare
+[ ] HSTS aktif di Cloudflare
+[ ] Bot Fight Mode aktif di Cloudflare
+[ ] TLS minimum 1.2 di Cloudflare
+[ ] Nginx security headers aktif (X-Frame-Options, X-Content-Type-Options, dll)
+[ ] Nginx rate limiting aktif
+[ ] Credentials cloudflared (chmod 600) sudah diproteksi
+[ ] Filebrowser signup dinonaktifkan
+[ ] UFW firewall dikonfigurasi di Ubuntu PRoot
+[ ] Node.js API menggunakan helmet.js dan express-rate-limit
+```
+
+---
+
+### Ganti Password Semua Service
+
+Ganti password default segera setelah setup pertama — jangan tunggu sampai server live:
 
 ```bash
-filebrowser users update admin --password "passwordBaruYangKuat" \
+# Filebrowser
+filebrowser users update admin \
+  --password "$(openssl rand -base64 24)" \
   --database /root/.filebrowser.db
 pm2 restart filebrowser
+
+# Webmin
+/usr/share/webmin/changepass.pl /etc/webmin root "$(openssl rand -base64 24)"
+
+# code-server
+nano ~/.config/code-server/config.yaml
+# Update: password: <password-baru>
+pm2 restart code-server
 ```
 
-### Gunakan Cloudflare Access
+Simpan semua password di password manager, bukan di file plain text di server.
 
-Cloudflare Access menambahkan layer autentikasi di depan subdomain — gratis untuk 1 user. Berguna untuk melindungi Filebrowser agar tidak bisa diakses sembarang orang meski URL diketahui.
+---
+
+### Cloudflare Zero Trust Access (Wajib untuk Panel)
+
+Cloudflare Access menambahkan layer autentikasi email OTP di depan subdomain — gratis untuk penggunaan personal. Tanpa ini, siapapun yang tahu URL panel bisa mencoba brute force login.
 
 ```
-Cloudflare Dashboard
-  → Zero Trust
-  → Access → Applications
+Cloudflare Dashboard → Zero Trust → Access → Applications
   → Add application → Self-hosted
-  → Domain: files.namaserver.com
-  → Policy: allow email = kamu@email.com
+
+Ulangi untuk setiap panel:
+  → panel.namaserver.com   (Webmin)
+  → code.namaserver.com    (code-server)
+  → files.namaserver.com   (Filebrowser)
+  → ssh.namaserver.com     (SSH tunnel)
+
+Policy: Allow → Emails → kamu@email.com
 ```
+
+---
+
+### UFW Firewall di Ubuntu PRoot
+
+Konfigurasi firewall untuk membatasi port yang bisa diakses dari jaringan lokal:
+
+```bash
+apt install ufw -y
+
+# Default policy
+ufw default deny incoming
+ufw default allow outgoing
+
+# Izinkan port yang dipakai
+ufw allow 80/tcp     # Nginx HTTP
+ufw allow 8080/tcp   # Filebrowser (jika akses langsung)
+ufw allow 10000/tcp  # Webmin (hanya jika perlu akses lokal)
+
+# Aktifkan
+ufw enable --force
+ufw status verbose
+```
+
+Untuk port yang hanya perlu diakses dari IP tertentu (misal komputer di rumah):
+
+```bash
+ufw allow from 192.168.1.100 to any port 10000
+```
+
+---
+
+### Update Sistem Secara Terjadwal
+
+Jalankan update rutin untuk menutup celah keamanan yang baru ditemukan:
+
+```bash
+# Update manual — jalankan setiap minggu
+apt update && apt upgrade -y
+
+# Atau buat cron job otomatis (setiap Minggu jam 03:00)
+crontab -e
+# Tambahkan:
+# 0 3 * * 0 apt update && apt upgrade -y >> /tmp/apt-update.log 2>&1
+```
+
+Update package Termux juga:
+
+```bash
+# Di Termux (bukan Ubuntu PRoot)
+pkg update && pkg upgrade -y
+```
+
+---
+
+### Audit Log Akses Berkala
+
+Periksa log secara berkala untuk mendeteksi aktivitas mencurigakan:
+
+```bash
+# Log akses Nginx (siapa saja yang request ke server)
+tail -100 /var/log/nginx/access.log
+
+# Filter IP yang paling banyak request (kemungkinan scanner)
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -20
+
+# Log error Nginx
+tail -50 /var/log/nginx/error.log
+
+# Log tunnel Cloudflare
+pm2 logs cloudflared --lines 100
+
+# Log semua service pm2
+pm2 logs --lines 50
+```
+
+Tanda-tanda aktivitas mencurigakan yang perlu diwaspadai:
+- Satu IP membuat ratusan request dalam waktu singkat
+- Request ke path yang tidak ada (`/wp-admin`, `/phpmyadmin`, `/.env`)
+- Error 401/403 berulang dari IP yang sama
+
+---
+
+### Enkripsi File Sensitif
+
+Jangan simpan file sensitif (private key, credential, token) di `~/storage` tanpa enkripsi:
+
+```bash
+# Enkripsi file sebelum disimpan
+gpg --symmetric --cipher-algo AES256 file-sensitif.txt
+# Akan menghasilkan file-sensitif.txt.gpg — aman disimpan
+
+# Dekripsi saat dibutuhkan
+gpg --decrypt file-sensitif.txt.gpg > file-sensitif.txt
+```
+
+---
+
+### Nonaktifkan Fitur yang Tidak Dipakai
+
+Setiap service yang berjalan adalah potensi attack surface. Matikan yang tidak dibutuhkan:
+
+```bash
+# Cek semua proses pm2 yang berjalan
+pm2 list
+
+# Stop service yang tidak dipakai saat ini
+pm2 stop <nama-service>
+
+# Hapus dari startup
+pm2 delete <nama-service>
+pm2 save
+```
+
+---
 
 ### Jangan Simpan File Sensitif Tanpa Enkripsi
 
-Folder `~/storage` adalah root Filebrowser. Jangan simpan file sangat sensitif (credential, private key) di sana tanpa enkripsi tambahan.
+Folder `~/storage` adalah root Filebrowser yang bisa diakses via web. Jangan simpan file sangat sensitif (credential, private key, database dump) di sana tanpa enkripsi tambahan.
 
 ---
 

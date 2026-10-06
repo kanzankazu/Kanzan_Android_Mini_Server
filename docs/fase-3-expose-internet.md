@@ -127,6 +127,86 @@ Setelah Phase 3, `pm2 list` harus menampilkan:
 
 ---
 
+## 🔒 Security Tips
+
+### Lindungi File Credentials Tunnel
+
+File `~/.cloudflared/<TUNNEL_ID>.json` adalah kunci tunnel kamu — siapapun yang punya file ini bisa membajak tunnel dan mengontrol traffic ke server.
+
+```bash
+# Pastikan hanya root yang bisa baca file credentials
+chmod 600 ~/.cloudflared/<TUNNEL_ID>.json
+chmod 600 ~/.cloudflared/cert.pem
+chmod 700 ~/.cloudflared/
+
+# Verifikasi
+ls -la ~/.cloudflared/
+```
+
+### Jangan Ekspos Port Secara Langsung
+
+Config Cloudflare Tunnel yang benar menggunakan `localhost` atau `127.0.0.1` sebagai target service — **bukan** IP jaringan lokal atau `0.0.0.0`:
+
+```yaml
+# ✅ BENAR — hanya bisa diakses via tunnel
+ingress:
+  - hostname: api.domain.com
+    service: http://localhost:80
+
+# ❌ SALAH — expose service langsung ke jaringan lokal
+ingress:
+  - hostname: api.domain.com
+    service: http://0.0.0.0:80
+```
+
+### Monitor Log Tunnel Secara Berkala
+
+Cek log cloudflared untuk mendeteksi aktivitas mencurigakan (koneksi berulang dari IP asing, error auth):
+
+```bash
+# Lihat log real-time
+pm2 logs cloudflared
+
+# Lihat 100 baris log terakhir
+pm2 logs cloudflared --lines 100
+
+# Simpan log ke file untuk analisis
+pm2 logs cloudflared --lines 500 > /tmp/tunnel-log.txt
+```
+
+### Batasi Ingress Hanya ke Service yang Diperlukan
+
+Jangan biarkan entry wildcard atau service yang tidak dipakai aktif di `config.yml`. Audit secara berkala:
+
+```bash
+cat ~/.cloudflared/config.yml
+# Hapus hostname yang tidak dipakai lagi
+```
+
+Setelah edit config, selalu restart dan verifikasi:
+
+```bash
+cloudflared tunnel ingress validate
+pm2 restart cloudflared
+```
+
+### Rotate Credentials Jika Dicurigai Bocor
+
+Jika credentials tunnel dicurigai bocor atau HP hilang:
+
+```bash
+# Hapus tunnel lama dari Cloudflare Dashboard
+# Buat tunnel baru dengan ID berbeda
+cloudflared tunnel create android-server-new
+
+# Update config.yml dengan tunnel ID baru
+nano ~/.cloudflared/config.yml
+```
+
+Atau langsung dari [Cloudflare Dashboard](https://dash.cloudflare.com) → Zero Trust → Networks → Tunnels → Delete tunnel lama.
+
+---
+
 ## ✅ Checklist Phase 3
 
 ```

@@ -69,6 +69,40 @@ ping -c 4 8.8.8.8
 
 ---
 
+## 🔒 Security Tips
+
+### Aktifkan Screen Lock di HP
+
+HP yang jadi server tetap harus terkunci jika ada yang pegang secara fisik:
+
+- Settings → **Security** → Screen lock → PIN atau Password (bukan swipe)
+- Aktifkan juga **USB debugging** hanya saat dibutuhkan, matikan kembali setelahnya
+
+### Batasi Permission Storage Termux
+
+Termux hanya perlu akses storage untuk operasi file — jangan beri izin lain yang tidak perlu:
+
+- Settings → Apps → Termux → Permissions → izinkan **Storage** saja
+- Jangan izinkan akses kontak, kamera, atau mikrofon
+
+### Jangan Install Termux dari Sumber Tidak Dikenal
+
+Hanya install Termux dari **F-Droid resmi** (`f-droid.org`). Versi dari sumber lain bisa dimodifikasi dan menjadi pintu masuk backdoor.
+
+### Amankan SSH Termux Sejak Awal
+
+Jika kamu berencana menginstall SSH (Phase 5), lakukan ini sekarang:
+
+```bash
+# Pastikan authorized_keys sudah ada sebelum expose ke internet
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+---
+
 ## ✅ Checklist Phase 0
 
 ```

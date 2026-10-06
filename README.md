@@ -86,7 +86,7 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 4. **[Phase 3](./docs/fase-3-expose-internet.md)** + **[Phase 4](./docs/fase-4-domain-custom.md)** — Expose ke internet via Cloudflare Tunnel + pasang domain custom *(±45–75 menit)*
 5. **[Phase 5](./docs/fase-5-remote-ssh.md)** *(opsional)* — Remote Termux via SSH dari komputer atau internet *(±20–30 menit)*
 6. **[Phase 6](./docs/fase-6-remote-gui.md)** *(opsional)* — Akses server via GUI browser: Webmin (mirip cPanel) atau VS Code *(±30–45 menit)*
-7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server atau cloud storage pribadi *(±20–45 menit)*
+7. **[Phase 7](./docs/fase-7-web-server-api.md)** atau **[Phase 8](./docs/fase-8-cloud-storage.md)** — Pilih use case: API server ([Express](./docs/api-express.md) / [Gin](./docs/api-gin.md) / [FastAPI](./docs/api-fastapi.md)) atau cloud storage ([Filebrowser](./docs/storage-filebrowser.md) / [Cloudreve](./docs/storage-cloudreve.md)) *(±20–60 menit)*
 
 ---
 
@@ -103,8 +103,14 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 | [Phase 4](./docs/fase-4-domain-custom.md) | Setup Domain Custom | 15–30 menit |
 | [Phase 5](./docs/fase-5-remote-ssh.md) | Remote Access via SSH *(opsional)* | 20–30 menit |
 | [Phase 6](./docs/fase-6-remote-gui.md) | Remote Access via GUI — Webmin & code-server *(opsional)* | 30–45 menit |
-| [Phase 7](./docs/fase-7-web-server-api.md) | Use Case A — Web Server & API | 30–45 menit |
-| [Phase 8](./docs/fase-8-cloud-storage.md) | Use Case B — Cloud Storage Pribadi | 20–30 menit |
+| [Phase 7](./docs/fase-7-web-server-api.md) | Use Case A — Web Server & API | 30–60 menit |
+| ↳ [Node.js + Express](./docs/api-express.md) | API dengan Express (default) | — |
+| ↳ [Go + Gin](./docs/api-gin.md) | API dengan Gin (performa terbaik) | — |
+| ↳ [Python + FastAPI](./docs/api-fastapi.md) | API dengan FastAPI (termudah) | — |
+| [Phase 8](./docs/fase-8-cloud-storage.md) | Use Case B — Cloud Storage Pribadi | 20–120 menit |
+| ↳ [Filebrowser](./docs/storage-filebrowser.md) | Storage ringan (default) | — |
+| ↳ [Cloudreve](./docs/storage-cloudreve.md) | Storage mirip Google Drive | — |
+| ↳ [Nextcloud](./docs/storage-nextcloud.md) | Full Google Workspace replacement | — |
 
 ### Referensi
 
@@ -129,6 +135,10 @@ Langkah-langkah dari HP kosong ke server yang bisa diakses dari internet:
 - [Cloudflare Zero Trust Access](https://developers.cloudflare.com/cloudflare-one/applications/)
 - [Webmin Documentation](https://webmin.com/docs/)
 - [code-server GitHub](https://github.com/coder/code-server)
+- [Gin Web Framework](https://gin-gonic.com/docs/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Cloudreve Documentation](https://docs.cloudreve.org/)
+- [Nextcloud Documentation](https://docs.nextcloud.com/)
 
 ---
 
