@@ -27,10 +27,10 @@ scripts/
 **Jalankan:**
 ```bash
 # Download & jalankan langsung
-curl -fsSL https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-termux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-termux.sh | bash
 
 # Atau download dulu, review, baru jalankan (lebih aman)
-wget https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-termux.sh
+wget https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-termux.sh
 cat setup-termux.sh   # review isinya
 bash setup-termux.sh
 ```
@@ -55,7 +55,7 @@ ubuntu             # masuk ke Ubuntu
 **Jalankan (di dalam Ubuntu):**
 ```bash
 # Pastikan sudah di dalam Ubuntu dulu!
-curl -fsSL https://raw.githubusercontent.com/username/Kanzan_Android_Mini_Server/main/scripts/setup-ubuntu.sh | bash
+curl -fsSL https://raw.githubusercontent.com/kanzankazu/Kanzan_Android_Mini_Server/master/scripts/setup-ubuntu.sh | bash
 ```
 
 **Estimasi waktu:** 20–45 menit
